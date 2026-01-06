@@ -1,0 +1,34 @@
+### OpenFOAM ###
+# Timestep directories
+0.*
+[1-9]*
+
+# Fields that must get ignored
+*/phi*
+*/meshPhi*
+
+# Decomposed domain
+processor*
+
+# logfiles
+log.*
+*log
+
+# paraview/ParaFoam
+*.foam
+*.OpenFOAM
+*.pvsm
+
+# mesh data that is no dictionary
+constant/polyMesh/points*
+constant/polyMesh/faces*
+constant/polyMesh/owner*
+constant/polyMesh/neighbour*
+constant/polyMesh/boundary*
+constant/polyMesh/sets
+constant/polyMesh/*
+
+# build
+lnInclude
+*.dep
+linux*
