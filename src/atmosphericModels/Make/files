@@ -1,0 +1,5 @@
+
+/* fvOptions */
+fvOptions/atmPlantCanopyUSource/myatmPlantCanopyUSource.C
+
+LIB = $(FOAM_USER_LIBBIN)/libmyatmosphericModels
