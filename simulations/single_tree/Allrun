@@ -1,0 +1,26 @@
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions 
+
+# Create background grid based on "userDict" parameters
+runApplication blockMesh
+
+# Decompose domain for parallel processing
+runParallel -s decompose redistributePar -decompose -constant -overwrite
+runParallel -s cast snappyHexMesh \
+    -dict system/snappyHexMeshDict.cast \
+    -overwrite
+
+# echo "Running snappyHexMesh (snap) in parallel..."
+# runParallel -s snap snappyHexMesh \
+#     -dict system/snappyHexMeshDict.snap \
+#     -overwrite
+
+echo "Checking mesh after snappyHexMesh (snap)..."
+runParallel checkMesh -constant
+
+echo "Running topoSet..."
+runParallel topoSet -dict system/topoSetDict
+
+echo "Renumbering mesh..."
+runParallel renumberMesh -overwrite
+
+runParallel simpleFoam 

@@ -1,0 +1,23 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+------------------------------------------------------------------------------
+Description:
+    This file contains the definitions for the ABL profiles coefficients
+    computed by minimizing the error between analytical and experimental values
+\*---------------------------------------------------------------------------*/
+
+Uref			6;
+Zref			50;
+flowDir         (1 0 0);       
+zDir            (0 0 1);       
+z0              uniform 0.001;
+zGround         uniform 0.0;
+d               uniform 0.0;
+value           $internalField;
+
+// ************************************************************************* //
+

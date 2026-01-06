@@ -1,0 +1,55 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+config
+{
+    type            cellZoneSet;
+    action          new;
+    source          surfaceToCell;
+    outsidePoints   ((-190 -54 86));
+    includeCut      false;
+    includeInside   true;
+    includeOutside  false;
+    nearDistance    -1;
+    curvature       0.9;
+    useSurfaceOrientation false;
+}
+
+actions
+(
+    
+  /*  #include "topoSet_crowns.inc" */
+    
+   
+     {
+        ${config};
+        includeCut      true; // ==> overestimating crowns volume
+        name            crownZone;
+        file            "constant/triSurface/crown.stl";
+    }
+
+    {
+        ${config};
+        includeCut      false;  // ==> underestimating trunk volume
+        name            trunkZone;
+        file            "constant/triSurface/trunk.stl";
+    }
+
+);
+
+
+// ************************************************************************* //
+

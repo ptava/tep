@@ -1,0 +1,118 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  dev
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "userDict"
+
+vertices
+(
+      ( $/background/min_x $/background/min_y $/background/min_z )
+      ( $/background/max_x $/background/min_y $/background/min_z )
+      ( $/background/max_x $/background/max_y $/background/min_z )
+      ( $/background/min_x $/background/max_y $/background/min_z )
+
+      ( $/background/min_x $/background/min_y $/background/max_z )
+      ( $/background/max_x $/background/min_y $/background/max_z )
+      ( $/background/max_x $/background/max_y $/background/max_z )
+      ( $/background/min_x $/background/max_y $/background/max_z )
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7)(
+        $/background/cells_x
+        $/background/cells_y
+        $/background/cells_z
+    ) 
+    simpleGrading ( 1 1 1 )
+
+);
+
+edges
+(
+);
+
+defaultPatch
+{
+    name        default;
+    type        wall;
+}
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)   // x = min_x
+        );
+    }
+
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (1 2 6 5)   // x = max_x
+        );
+    }
+
+    ground
+    {
+        type wall;
+        faces
+        (
+            (0 3 2 1)   // z = min_z
+        );
+    }
+
+    top
+    {
+        type patch;   
+        faces
+        (
+            (4 5 6 7)   // z = max_z
+        );
+    }
+
+    lateral1
+    {
+        type symmetryPlane;   // y = min_y
+        faces
+        (
+            (0 1 5 4)
+        );
+    }
+
+    lateral2
+    {
+        type symmetryPlane;   // y = max_y
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
+);
+
+defaultPatch
+{
+    name        default;
+    type        wall;
+}
+
+
+
+// ************************************************************************* //
