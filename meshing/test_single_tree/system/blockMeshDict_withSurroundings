@@ -1,0 +1,142 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  dev
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "userDict"
+
+vertices
+(
+      ( $/background/min_x $/background/min_y $/background/min_z )
+      ( $/background/max_x $/background/min_y $/background/min_z )
+      ( $/background/max_x $/background/max_y $/background/min_z )
+      ( $/background/min_x $/background/max_y $/background/min_z )
+      ( $/background/min_x $/background/min_y $/background/max_z )
+      ( $/background/max_x $/background/min_y $/background/max_z )
+      ( $/background/max_x $/background/max_y $/background/max_z )
+      ( $/background/min_x $/background/max_y $/background/max_z )
+
+
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7)(
+        $/background/NxTotal
+        $/background/NyTotal
+        $/background/NzTotal
+    ) 
+    simpleGrading ( 
+        // x-grading
+        (
+                ( 
+                    $/background/ratio_dx 
+                    $/background/ratio_nx 
+                    1 
+                )
+                ( 
+                    $/background/ratio_dx_graded 
+                    $/background/ratio_nx_graded 
+                    $background/sx 
+                )
+        )
+        // y-grading
+        (
+                ( 
+                    $/background/ratio_dy 
+                    $/background/ratio_ny 
+                    1 
+                )
+                ( 
+                    $/background/ratio_dy_graded 
+                    $/background/ratio_ny_graded 
+                    $background/sy 
+                )
+        )
+        // z-grading
+        (
+                ( 
+                    $/background/ratio_dz 
+                    $/background/ratio_nz 
+                    1 
+                )
+                ( 
+                    $/background/ratio_dz_graded 
+                    $/background/ratio_nz_graded 
+                    $background/sz 
+                )
+        )
+    )
+
+);
+
+edges
+(
+);
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (1 2 6 5)
+            (3 7 6 2)
+        );
+    }
+
+    top
+    {
+        type symmetry; // Approx: no influence of "top" to building influence region 
+        inGroups 1(symmetry);
+        faces
+        (
+            (4 5 6 7)
+        );
+    }
+  
+    ground
+    {
+        type wall;
+        faces
+        (
+            (0 3 2 1)
+        );
+    }
+
+     
+    lateral1
+    {
+        type symmetry; // Approx: no influence of "top" to building influence region 
+        inGroups 1(symmetry);
+        faces
+        (
+            (1 5 4 0)
+        );
+    }
+     
+);
+
+
+// ************************************************************************* //

@@ -1,3 +1,29 @@
+## Material
+This folder contains three examples of snappyHexMesh uasge:
+- with a single tree;
+- with two overlapping trees;
+- with an entire city district;
+
+!!!! Resources folder not available !!!!
+
+To create grid use run:
+```
+./Allrun
+```
+
+To visualize results use:
+paraview visualization.pvsm
+
+! External boundaries not provided (to be defined in blockMeshDict)
+! Boundary conditions for simulations not provided
+
+Possible test case could be based on `test_overlapping`. Need to:
+- extend mesh limits;
+- add boundary conditions based on available libraries;
+- define porosity model for trunks;
+- define porosity model for leaves (that works with overlapping crowns).
+
+
 ## From 3D models to computational domain
 
 Tools: blockMesh + snappyHexMesh + topoSet

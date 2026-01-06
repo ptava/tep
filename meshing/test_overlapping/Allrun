@@ -1,0 +1,63 @@
+#!/bin/bash
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+#--- Test case with single tree ---#
+
+requiredFiles=" \
+    ../resources/tree.stl \
+    ../resources/trunk.stl \
+    ../resources/roads.stl \
+    ../resources/terrain.stl
+"
+for file in $requiredFiles; do
+    cp $file constant/triSurface/.
+done
+
+# Create a tree that overlapps the current one
+surfaceTransformPoints -translate "(3 3 0)" \
+    constant/triSurface/tree.stl constant/triSurface/tree1.stl
+surfaceTransformPoints -translate "(3 3 0)" \
+    constant/triSurface/trunk.stl constant/triSurface/trunk1.stl
+
+# Keep trunk1 and trunk2 in the same file for simplicity
+cat constant/triSurface/trunk.stl constant/triSurface/trunk1.stl > \
+    constant/triSurface/trunks.stl
+rm constant/triSurface/trunk.stl constant/triSurface/trunk1.stl
+
+# Create background grid based on "userDict" parameters
+runApplication blockMesh
+
+# Check the background mesh
+runApplication -s background checkMesh
+
+# Decompose domain for parallel processing
+runParallel -s decompose redistributePar -decompose -constant
+# or (equivalent)
+# runApplication -s preprocess decomposePar -constant
+
+# Run castelletedMesh process (use -overwrite to constant folder)
+runParallel -s cast shappyHexMesh \
+    -dict system/snappyHexMeshDict.cast \
+    -overwrite
+runParallel -s cast checkMesh -constant
+
+# Run snap process (example with "terrain" smoothed while "road" not)
+runParallel -s snap snappyHexMesh \
+    -dict system/snappyHexMeshDict.snap \
+    -overwrite
+runParallel -s snap checkMesh -constant
+
+# Overwrite crown/trunk regions
+# runApplication topoSet -dict system/topoSetDict
+
+# Reconstruct the mesh
+runApplication -s reconstruct redistributePar -reconstruct -constant
+
+# Create VTK files for cellZones visualization
+runApplication -s tree foamToVTK -cellZone treeZone
+runApplication -s trunk foamToVTK -cellZone trunkZone
+
+
+#------------------------------------------------------------------------------

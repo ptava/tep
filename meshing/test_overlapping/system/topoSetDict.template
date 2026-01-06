@@ -1,0 +1,11 @@
+    type            cellZoneSet;
+    action          new;
+    source          surfaceToCell;
+    outsidePoints   ((355 -577 69));
+    inlcudeCut      false;
+    includeInside   true;
+    includeOutside  false;
+    nearDistance    -1;
+    curvature       0.9;
+    useSurfaceOrientation false;
+

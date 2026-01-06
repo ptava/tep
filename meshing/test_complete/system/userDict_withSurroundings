@@ -1,0 +1,222 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+refinement
+{
+    // refinement for wake region
+    r1
+    {
+        min_x   -0.9;
+        max_x   1.4;
+        min_y   -0.9;
+        max_y   1.4;
+        min_z   0.0;
+        max_z   0.9;
+    }
+
+    // refinement around the building block
+    r2
+    {
+        min_x   -0.9;
+        max_x   0.9;
+        min_y   -0.9;
+        max_y   0.9;
+        min_z   0.0;
+        max_z   0.75;
+    }
+
+    // refinement inside the building block
+    r3
+    {
+        min_x   -0.2;
+        max_x   0.2;
+        min_y   -0.2;
+        max_y   0.2;
+        min_z   0.0;
+        max_z   0.6;
+    }
+}
+
+
+background
+{
+    // Length of cubic cells in "uniform" region
+    // be careful about this because we're doing only castellation with snappy
+    cells_scaling   0.05;
+
+    // Domain limit
+    min_x   -1.4;
+    max_x   3.0;
+    min_y   -1.4;
+    max_y   3.0;
+    min_z   0;
+    max_z   2.8; 
+
+    // Lengths
+    length_x   #eval{ ${max_x} - ${min_x} };
+    length_y   #eval{ ${max_y} - ${min_y} };
+    length_z   #eval{ ${max_z} - ${min_z} };
+
+    // Positions to go from "uniform" to "graded" region
+    x_zone  1.1;
+    y_zone  ${x_zone};
+    z_zone  0.8;
+
+    // Length of the uniform region
+    length_uniform_x  #eval{ ${x_zone} - ${min_x} };
+    length_uniform_y  #eval{ ${y_zone} - ${min_y} };
+    length_uniform_z  #eval{ ${z_zone} - ${min_z} };
+    length_graded_x #eval{ ${length_x} - ${length_uniform_x} };
+    length_graded_y #eval{ ${length_y} - ${length_uniform_y} };
+    length_graded_z #eval{ ${length_z} - ${length_uniform_z} };
+
+    // Grading graded region
+    cell_exp_ratio  1.2;
+    dx_final    0.15;
+    dy_final    0.15;
+    dz_final    0.075;
+    sx  #eval{${dx_final}/${cells_scaling}};
+    sy  #eval{${dy_final}/${cells_scaling}};
+    sz  #eval{${dz_final}/${cells_scaling}};
+
+    // Cells in uniform region
+    Nx_uniform  #eval{${length_uniform_x} / ${cells_scaling}};
+    Ny_uniform  #eval{${length_uniform_y} / ${cells_scaling}};
+    Nz_uniform  #eval{${length_uniform_z} / ${cells_scaling}};
+
+
+    // Cells in graded region
+    Nx_graded #codeStream
+    {
+        code
+        #{
+            const scalar tol  = 1.0e-10;
+            const int maxIter = 100;
+            scalar expRcorr   = ${cell_exp_ratio};
+            scalar totExpR    = ${sx};
+            scalar Nx         = Foam::log(totExpR)/Foam::log(expRcorr);
+            scalar deltaStart = ${cells_scaling};
+            scalar lEdge      = ${length_graded_x};
+
+            for (int iter=0; iter < maxIter; ++iter)
+            {
+                scalar coeff  = pow(totExpR, 1./(Nx-1.));
+                scalar coeffN = pow(totExpR, Nx/(Nx-1.));
+
+                scalar f      = (deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge;
+                scalar fPrime = deltaStart * Foam::log(totExpR) * (1./sqr(Nx-1.)) * ((1.-coeff)*coeffN - (1.-coeffN)*coeff)/ sqr(1.-coeff);
+                Nx            = Nx - (f/fPrime);
+
+                scalar residual = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
+                if (residual <= tol) break;
+            }
+            os  << floor(Nx);
+        #};
+    };
+
+    Ny_graded #codeStream
+    {
+        code
+        #{
+            const scalar tol  = 1.0e-10;
+            const int maxIter = 100;
+            scalar expRcorr   = ${cell_exp_ratio};
+            scalar totExpR    = ${sy};
+            scalar Ny         = Foam::log(totExpR)/Foam::log(expRcorr);
+            scalar deltaStart = ${cells_scaling};
+            scalar lEdge      = ${length_graded_y};
+
+            for (int iter=0; iter < maxIter; ++iter)
+            {
+                scalar coeff  = pow(totExpR, 1./(Ny-1.));
+                scalar coeffN = pow(totExpR, Ny/(Ny-1.));
+
+                scalar f      = (deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge;
+                scalar fPrime = deltaStart * Foam::log(totExpR) * (1./sqr(Ny-1.)) * ((1.-coeff)*coeffN - (1.-coeffN)*coeff)/ sqr(1.-coeff);
+                Ny            = Ny - (f/fPrime);
+
+                scalar residual = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
+                if (residual <= tol) break;
+            }
+            os  << floor(Ny);
+        #};
+    };
+
+    Nz_graded #codeStream
+    {
+        code
+        #{
+            const scalar tol  = 1.0e-10;
+            const int maxIter = 100;
+            scalar expRcorr   = ${cell_exp_ratio};
+            scalar totExpR    = ${sz};
+            scalar Nz         = Foam::log(totExpR)/Foam::log(expRcorr);
+            scalar deltaStart = ${cells_scaling};
+            scalar lEdge      = ${length_graded_z};
+
+            for (int iter=0; iter < maxIter; ++iter)
+            {
+                scalar coeff  = pow(totExpR, 1./(Nz-1.));
+                scalar coeffN = pow(totExpR, Nz/(Nz-1.));
+
+                scalar f      = (deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge;
+                scalar fPrime = deltaStart * Foam::log(totExpR) * (1./sqr(Nz-1.)) * ((1.-coeff)*coeffN - (1.-coeffN)*coeff)/ sqr(1.-coeff);
+                Nz            = Nz - (f/fPrime);
+
+                scalar residual = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
+                if (residual <= tol) break;
+            }
+            os  << floor(Nz);
+        #};
+    };
+
+
+    // Total number of cells in each direction
+    NxTotal #eval{ ${Nx_uniform} + ${Nx_graded} };
+    NyTotal #eval{ ${Ny_uniform} + ${Ny_graded} };
+    NzTotal #eval{ ${Nz_uniform} + ${Nz_graded} };
+
+    // Ratios of cells number 
+    ratio_nx #eval{ ${Nx_uniform} / ${NxTotal} };
+    ratio_ny #eval{ ${Ny_uniform} / ${NyTotal} };
+    ratio_nz #eval{ ${Nz_uniform} / ${NzTotal} };
+    ratio_nx_graded #eval{ 1.0 - ${ratio_nx} };
+    ratio_ny_graded #eval{ 1.0 - ${ratio_ny} };
+    ratio_nz_graded #eval{ 1.0 - ${ratio_nz} };
+
+    // Ratios of edge length
+    ratio_dx #eval{ ${length_uniform_x} / ${length_x} };
+    ratio_dy #eval{ ${length_uniform_y} / ${length_y} };
+    ratio_dz #eval{ ${length_uniform_z} / ${length_z} };
+    ratio_dx_graded #eval{ 1.0 - ${ratio_dx} };
+    ratio_dy_graded #eval{ 1.0 - ${ratio_dy} };
+    ratio_dz_graded #eval{ 1.0 - ${ratio_dz} };
+
+}
+
+protected
+{
+    min_x           -0.5;
+    min_y           -0.5;
+    min_z           -0.5;
+
+    max_x           0.5;
+    max_y           0.5;
+    max_z           0.5;
+}
+
+refine
+{
+    min_x           -0.7;
+    min_y           -0.7;
+    min_z           -0.7;
+
+    max_x           0.7;
+    max_y           0.7;
+    max_z           0.7;
+}

@@ -1,0 +1,102 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  dev
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "(p|pcorr)"
+    {
+        solver          GAMG;
+        smoother        GaussSeidel;
+        tolerance       1e-6;
+        relTol          0.1;
+    }
+
+    "(pFinal|pcorrFinal)"
+    {
+        $p;
+        relTol 0;
+    }
+
+    "(U|k|omega)"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-6;
+        relTol          0.01;
+    }
+    "(U|k|omega)Final"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+}
+
+PIMPLE
+{
+    // Set algorithm
+    consistent	    yes;    
+    turbOnFinalIterOnly no;
+
+    // Set correctors
+    nNonOrthogonalCorrectors 2;
+    nOuterCorrectors 5;
+    nCorrectors      2;
+
+    // Control residuals
+	residualControl
+	{
+		p
+		{
+			relTol		0;
+			tolerance	1e-04;
+		}
+		"(U|omega|k)"
+		{
+			relTol		0;
+			tolerance	1e-05;
+		}
+	}
+
+    // Reference pressure
+    pRefCell         0;
+    pRefValue        0;
+
+}
+
+relaxationFactors
+{
+    fields
+    {
+        p                       lookup;
+        name                    customRf;
+        pFinal                  1;
+    }
+    equations
+    {
+        U                       lookup;
+        name                    customRf;
+        UFinal                  1;
+        "(k|omega)"             lookup;
+        name                    customRf;
+        "(k|omega)Final"        1;
+    }
+
+}
+
+// ************************************************************************* //

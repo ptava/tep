@@ -1,0 +1,59 @@
+#!/bin/bash
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+#--- Test case with city district ---#
+
+requiredFiles=" \
+    ../resources/celtis.stl \
+    ../resources/trunks.stl \
+    ../resources/roads.stl \
+    ../resources/terrain.stl \
+    ../resources/buildings.stl \
+    ../resources/green_areas.stl \
+    ../resources/sports_areas.stl \
+"
+for file in $requiredFiles; do
+    cp $file constant/triSurface/.
+done
+
+# Create background grid based on "userDict" parameters
+runApplication blockMesh
+
+# Check the background mesh
+runApplication -s background checkMesh
+
+# Preprocess geometry files extracting edges features
+runApplication surfaceFeatureExtract
+
+# Decompose domain for parallel processing
+runParallel -s decompose redistributePar -decompose -constant
+# or (equivalent)
+# runApplication -s preprocess decomposePar -constant
+
+# Run castelletedMesh process 
+# try deactivating edgge features
+runParallel -s cast shappyHexMesh \
+    -dict system/snappyHexMeshDict.cast \
+    -overwrite
+runParallel -s cast checkMesh -constant
+
+# Run snap process (all ground surfaces and builgings)
+runParallel -s snap snappyHexMesh \
+    -dict system/snappyHexMeshDict.snap \
+    -overwrite
+runParallel -s snap checkMesh -constant
+
+# Overwrite crown/trunk regions
+runApplication topoSet -dict system/topoSetDict
+
+# Reconstruct the mesh
+runApplication -s reconstruct redistributePar -reconstruct -constant
+
+# Create VTK files for cellZones visualization
+runApplication -s tree foamToVTK -cellZone treeZone
+runApplication -s trunk foamToVTK -cellZone trunkZone
+
+
+#------------------------------------------------------------------------------
