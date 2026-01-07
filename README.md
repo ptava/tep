@@ -82,9 +82,12 @@ Despite many studies on vegetation effects in urban CFD, there is no end-to-end,
 2. consistently couples vegetation parameterizations (porous media + wall functions) across momentum, turbulence, heat, humidity, and pollutant transport, suitable for coarse-grained city-scale domains.
 
 **Hypotheses**
-H1. Species-aware porous/wall-function parameterizations (drag, LAD, heat & moisture exchange, deposition) reproduce key micro-climate and dispersion metrics within acceptable errors vs field campaigns
-H2. Using **semantic surfaces** with surface-specific wall parameters (roughness, thermal properties) improves RANS predictions in vegetated urban areas.
-H3. An automated data to model to mesh pipeline scales to large urban areas while preserving enough fidelity (procedure based on *city4cfd* and *snappyHexMesh*)
+
+**H1.** Species-aware porous/wall-function parameterizations (drag, LAD, heat & moisture exchange, deposition) reproduce key micro-climate and dispersion metrics within acceptable errors vs field campaigns
+
+**H2.** Using **semantic surfaces** with surface-specific wall parameters (roughness, thermal properties) improves RANS predictions in vegetated urban areas.
+
+**H3.** An automated data to model to mesh pipeline scales to large urban areas while preserving enough fidelity (procedure based on *city4cfd* and *snappyHexMesh*)
 
 **Objectives** (... Begin the path, completion isn't required)
 
