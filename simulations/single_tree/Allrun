@@ -21,6 +21,6 @@ echo "Running topoSet..."
 runParallel topoSet -dict system/topoSetDict
 
 echo "Renumbering mesh..."
-runParallel renumberMesh -overwrite
+runParallel renumberMesh -constant -overwrite
 
 runParallel simpleFoam 
