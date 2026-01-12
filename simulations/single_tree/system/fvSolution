@@ -24,6 +24,11 @@ solvers
         relTol          0.01;
     }
 
+    Phi
+    {
+        $p
+    }
+
     U
     {
         solver          smoothSolver;

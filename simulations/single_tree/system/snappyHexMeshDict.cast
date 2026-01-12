@@ -22,38 +22,45 @@ addLayers       off;
 
 geometry
 {
-   crown.stl
+    ground
+    {
+        type plane;
+        planeType pointAndNormal;
+        pointAndNormalDict
+        {
+            point (0 0 51.1);
+            normal (0 0 1);
+        }
+    }
+
+    crown.stl
     {
         type triSurfaceMesh;
-      
         name crown;
     }
-   trunk.stl
+
+    trunk.stl
     {
         type triSurfaceMesh;
-        
         name trunk;
     }
+
     r1Box
-{
-    type searchableBox;
-
-    min
-    (
-        $/refinement/r1/min_x
-        $/refinement/r1/min_y
-        $/refinement/r1/min_z
-    );
-
-    max
-    (
-        $/refinement/r1/max_x
-        $/refinement/r1/max_y
-        $/refinement/r1/max_z
-    );
-}
-
-
+    {
+        type searchableBox;
+        min
+        (
+            $/refinement/r1/min_x
+            $/refinement/r1/min_y
+            $/refinement/r1/min_z
+        );
+        max
+        (
+            $/refinement/r1/max_x
+            $/refinement/r1/max_y
+            $/refinement/r1/max_z
+        );
+    }
  
 };
 
@@ -68,7 +75,7 @@ castellatedMeshControls
 
     maxLoadUnbalance 0.10;
 
-    nCellsBetweenLevels 2;
+    nCellsBetweenLevels 4;
 
     features
     (
@@ -77,9 +84,16 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        
-        
-         crown
+        ground
+        {
+            level (2 2);
+            patchInfo
+            {
+                type wall;
+            }
+        }
+
+        crown
         {
             level          (4 4);
             faceZone       crownZone;
@@ -98,7 +112,7 @@ castellatedMeshControls
 
     refinementRegions
     {
-       crown
+        crown
         {
             mode inside;
             levels ((1e15 4));
@@ -109,12 +123,12 @@ castellatedMeshControls
             mode inside;
             levels ((1e15 5));
         }
-         r1Box
-    {
-        mode inside;
-        levels ((1e15 2));
-    }
-      
+
+        r1Box
+        {
+            mode inside;
+            levels ((1e15 2));
+        }
     }
 
     locationInMesh (-190 -54 86);

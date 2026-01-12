@@ -4,8 +4,7 @@
 runApplication blockMesh
 
 # Decompose domain for parallel processing
-runParallel -s decompose redistributePar -decompose -constant -overwrite
-runParallel -s cast snappyHexMesh \
+runApplication -s cast snappyHexMesh \
     -dict system/snappyHexMeshDict.cast \
     -overwrite
 
@@ -15,12 +14,17 @@ runParallel -s cast snappyHexMesh \
 #     -overwrite
 
 echo "Checking mesh after snappyHexMesh (snap)..."
-runParallel checkMesh -constant
+runApplication checkMesh -constant
 
 echo "Running topoSet..."
-runParallel topoSet -dict system/topoSetDict
+runApplication topoSet -dict system/topoSetDict
 
 echo "Renumbering mesh..."
+runApplication -s decompose decomposePar -constant -force
 runParallel renumberMesh -constant -overwrite
 
+echo "Initializing solution..."
+runParallel potentialFoam
+
+echo "Running simpleFoam..."
 runParallel simpleFoam 

@@ -11,11 +11,11 @@ Description:
 \*---------------------------------------------------------------------------*/
 
 Uref			6;
-Zref			50;
+Zref			70;
 flowDir         (1 0 0);       
 zDir            (0 0 1);       
 z0              uniform 0.001;
-zGround         uniform 0.0;
+zGround         uniform 51.1;
 d               uniform 0.0;
 value           $internalField;
 
